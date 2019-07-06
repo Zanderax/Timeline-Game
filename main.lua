@@ -5,17 +5,26 @@ slots = 5
 slotLength = 15
 slotOffset = 25
 slotWidth = 150
+changeFactor = 2
+bias = 0
+
 
 line = {}
-for i=1, lineLength do
-    line[i] = love.math.random( -80, 80 )
+line[1] = 0
+for i=2, lineLength do
+    change = love.math.random( -changeFactor, changeFactor )
+    line[i] = line[i-1] + change + bias
+    bias = change
 end
 
 slot = {}
 for s=1, slots do
     slot[s] = {}
-    for i=1, slotLength, 1 do
-        slot[s][i] = love.math.random( -80, 80 )
+    -- Timeline starts as stable
+    slot[s][1] = 0
+    for i=2, slotLength, 1 do
+        change = love.math.random( -changeFactor, changeFactor )
+        slot[s][i] = slot[s][i-1] + change
     end
 end
 
