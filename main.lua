@@ -8,6 +8,19 @@ slotWidth = 150
 changeFactor = 2
 bias = 0
 
+-- UI
+-- mode, x, y, width, height
+MAIN_BOX = { "line", 0, 25, 800, 300 }
+
+SLOT_BOXES = {}
+for i = 0, 4 do
+    SLOT_BOXES[i+1] = {}
+    -- Slot
+    SLOT_BOXES[i+1][1] = { "line", i*150 + 25, 350, 125, 175 }
+
+    -- Refresh Button
+    SLOT_BOXES[i+1][2] = { "line", i*150 + 50, 550, 100, 25 }
+end
 
 line = {}
 line[1] = 0
@@ -34,9 +47,12 @@ LINE_COLOR = {0.55, 0.1, 0.94}
 function love.draw()
     love.graphics.setColor(UI_COLOR)
 
-    -- Timeline Boarders
-    love.graphics.line( 0, 25, 800, 25 )
-    love.graphics.line( 0, 325, 800, 325 )
+    love.graphics.rectangle( unpack(MAIN_BOX) )
+
+    for i = 1, 5 do
+        love.graphics.rectangle( unpack(SLOT_BOXES[i][1]) )
+        love.graphics.rectangle( unpack(SLOT_BOXES[i][2]) )
+    end
 
     -- Timeline Middle Line
     for i = 0, 800,30 do
@@ -45,19 +61,6 @@ function love.draw()
 
     -- Timeline Slots
     for i = 25, 750, 150 do
-        -- Slot
-        love.graphics.setColor(UI_COLOR)
-        love.graphics.line( i, 350, i + 125, 350 )
-        love.graphics.line( i, 525, i + 125, 525 )
-        love.graphics.line( i, 350, i, 525 )
-        love.graphics.line( i + 125, 350, i + 125, 525 )
-
-        --Refresh Button
-        love.graphics.line( i + 25, 550, i + 100, 550 )
-        love.graphics.line( i + 25, 575, i + 100, 575 )
-        love.graphics.line( i + 25, 550, i + 25, 575 )
-        love.graphics.line( i + 100, 550, i + 100, 575 )
-
 
         -- Slot Middle Line
         love.graphics.setColor(LINE_COLOR)
