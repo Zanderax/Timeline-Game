@@ -86,6 +86,14 @@ function love.draw()
     end
 end
 
+function refreshSlot( slotIndex )
+    slot[slotIndex][1] = 0
+    for i=2, slotLength do
+        change = love.math.random( -changeFactor, changeFactor )
+        slot[slotIndex][i] = slot[slotIndex][i-1] + change
+    end
+end
+
 function addSlotToLine( slotIndex, lineStart )
     for i = lineStart, slotLength do
         line[i] = line[i] + slot[slotIndex][i]
@@ -112,6 +120,7 @@ function love.mousepressed( x, y, button )
         slotClicked = coordInSlot( x, y )
         if slotClicked ~= -1 then
             addSlotToLine(slotClicked, 1)
+            refreshSlot(slotClicked)
         end
     end
 end
