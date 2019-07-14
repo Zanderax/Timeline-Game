@@ -10,6 +10,12 @@ bias = 0
 maxTimelineVariation = 150
 lose = false
 
+selectionLineIndex = 20
+
+UI_COLOR = {1, 1, 1}
+LINE_COLOR = {0.55, 0.1, 0.94}
+SELECTION_LINE_COLOR = { 0.4, 0.56, 0.14 }
+
 -- UI
 -- mode, x, y, width, height
 MAIN_BOX = { "line", 0, 25, 800, 300 }
@@ -43,15 +49,14 @@ for s=1, slots do
     end
 end
 
-UI_COLOR = {1, 1, 1}
-LINE_COLOR = {0.55, 0.1, 0.94}
-
 function love.draw()
     love.graphics.setColor(UI_COLOR)
 
     if lose then
         love.graphics.print("The timeline is too unstable. You lose!")
     end
+
+    drawLineSelection()
 
     love.graphics.rectangle( unpack(MAIN_BOX) )
 
@@ -92,6 +97,16 @@ function love.draw()
     end
 end
 
+function drawLineSelection( )
+    love.graphics.push()
+    love.graphics.setColor(SELECTION_LINE_COLOR)
+    x1 = ( selectionLineIndex - 1 ) * 8
+    y1 = MAIN_BOX[3]
+    y2 = MAIN_BOX[3] + MAIN_BOX[5]
+    love.graphics.line( x1, y1, x1, y2 )
+    love.graphics.pop()
+end
+
 function checkLose()
     for i = 1, lineLength do
         if line[i] > 150 or line[i] < -150 then
@@ -108,10 +123,11 @@ function refreshSlot( slotIndex )
     end
 end
 
-function addSlotToLine( slotIndex, lineStart )
-    for i = lineStart, slotLength do
-        line[i] = line[i] + slot[slotIndex][i]
-        if i == lineLength then
+function addSlotToLine( slotIndex )
+    for i = 1, slotLength do
+        lineIndex = selectionLineIndex + i - 3
+        line[lineIndex] = line[lineIndex] + slot[slotIndex][i]
+        if lineIndex == lineLength then
             return
         end
     end
@@ -129,6 +145,16 @@ function coordInSlot( x, y )
     return -1
 end
 
+function coordInBox( x, y )
+    if x > MAIN_BOX[2] and
+    x < MAIN_BOX[2] + MAIN_BOX[4] and
+    y > MAIN_BOX[3] and
+    y < MAIN_BOX[3] + MAIN_BOX[5] then
+        selection = math.floor(x / 8)
+        selectionLineIndex = selection + 1
+    end
+end
+
 function love.mousepressed( x, y, button )
     if button == 1 then
         slotClicked = coordInSlot( x, y )
@@ -137,6 +163,7 @@ function love.mousepressed( x, y, button )
             refreshSlot(slotClicked)
             checkLose()
         end
+        coordInBox( x, y )
     end
 end
 
