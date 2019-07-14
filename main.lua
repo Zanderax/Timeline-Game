@@ -5,7 +5,7 @@ slots = 5
 slotLength = 15
 slotOffset = 25
 slotWidth = 150
-changeFactor = 2
+changeFactor = 8
 bias = 0
 
 -- UI
@@ -15,11 +15,11 @@ MAIN_BOX = { "line", 0, 25, 800, 300 }
 SLOT_BOXES = {}
 for i = 0, 4 do
     SLOT_BOXES[i+1] = {}
-    -- Slot
-    SLOT_BOXES[i+1][1] = { "line", i*150 + 25, 350, 125, 175 }
+    -- Slot                Mode    X           Y    Width Height
+    SLOT_BOXES[i+1][1] = { "line", i*150 + 25, 350, 125,  175 }
 
-    -- Refresh Button
-    SLOT_BOXES[i+1][2] = { "line", i*150 + 50, 550, 100, 25 }
+    -- Refresh Button      Mode    X           Y    Width Height
+    SLOT_BOXES[i+1][2] = { "line", i*150 + 38, 550, 100,  25 }
 end
 
 line = {}
@@ -82,6 +82,36 @@ function love.draw()
         love.graphics.circle( "fill", i*8, lineYCoord - line[i], 2)
         if i < lineLength then
             love.graphics.line( i*8, lineYCoord - line[i], (i+1)*8, lineYCoord - line[i+1] )
+        end
+    end
+end
+
+function addSlotToLine( slotIndex, lineStart )
+    for i = lineStart, slotLength do
+        line[i] = line[i] + slot[slotIndex][i]
+        if i == lineLength then
+            return
+        end
+    end
+end
+
+function coordInSlot( x, y )
+    for i = 1, slots do
+        if x > SLOT_BOXES[i][1][2] and
+            x < SLOT_BOXES[i][1][2] + SLOT_BOXES[i][1][4] and
+            y > SLOT_BOXES[i][1][3] and
+            y < SLOT_BOXES[i][1][3] + SLOT_BOXES[i][1][5] then
+            return i
+        end
+    end
+    return -1
+end
+
+function love.mousepressed( x, y, button )
+    if button == 1 then
+        slotClicked = coordInSlot( x, y )
+        if slotClicked ~= -1 then
+            addSlotToLine(slotClicked, 1)
         end
     end
 end
