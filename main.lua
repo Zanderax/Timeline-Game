@@ -7,6 +7,8 @@ slotOffset = 25
 slotWidth = 150
 changeFactor = 8
 bias = 0
+maxTimelineVariation = 150
+lose = false
 
 -- UI
 -- mode, x, y, width, height
@@ -47,6 +49,10 @@ LINE_COLOR = {0.55, 0.1, 0.94}
 function love.draw()
     love.graphics.setColor(UI_COLOR)
 
+    if lose then
+        love.graphics.print("The timeline is too unstable. You lose!")
+    end
+
     love.graphics.rectangle( unpack(MAIN_BOX) )
 
     for i = 1, 5 do
@@ -86,6 +92,14 @@ function love.draw()
     end
 end
 
+function checkLose()
+    for i = 1, lineLength do
+        if line[i] > 150 or line[i] < -150 then
+            lose = true
+        end
+    end
+end
+
 function refreshSlot( slotIndex )
     slot[slotIndex][1] = 0
     for i=2, slotLength do
@@ -121,6 +135,7 @@ function love.mousepressed( x, y, button )
         if slotClicked ~= -1 then
             addSlotToLine(slotClicked, 1)
             refreshSlot(slotClicked)
+            checkLose()
         end
     end
 end
