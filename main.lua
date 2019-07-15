@@ -25,6 +25,10 @@ for i = 0, 4 do
     SLOT_BOXES[i+1] = {}
     -- Slot                Mode    X           Y    Width Height
     SLOT_BOXES[i+1][1] = { "line", i*150 + 25, 350, 125,  175 }
+    
+    -- Slot                Mode    X           Y    Width Height
+    SLOT_BOXES[i+1][1] = { "line", i*150 + 25, 350, 125,  175 }
+    
 
     -- Refresh Button      Mode    X           Y    Width Height
     SLOT_BOXES[i+1][2] = { "line", i*150 + 38, 550, 100,  25 }
@@ -70,10 +74,16 @@ function love.draw()
         love.graphics.line( i, 175, i+15, 175 )
     end
 
+    -- Slot Middle Line
+    for i = 1, slots do
+        x1 = SLOT_BOXES[i][1][2]
+        x2 = SLOT_BOXES[i][1][2] + SLOT_BOXES[i][1][4]
+        y1 = SLOT_BOXES[i][1][3] + SLOT_BOXES[i][1][5] / 2
+        love.graphics.line( x1, y1, x2, y1 )
+    end
+
     -- Timeline Slots
     for i = 25, 750, 150 do
-
-        -- Slot Middle Line
         love.graphics.setColor(LINE_COLOR)
         for s = 1, slots do
             for i = 1, slotLength do
@@ -125,7 +135,7 @@ end
 
 function addSlotToLine( slotIndex )
     for i = 1, slotLength do
-        lineIndex = selectionLineIndex + i - 3
+        lineIndex = selectionLineIndex + i - 2
         line[lineIndex] = line[lineIndex] + slot[slotIndex][i]
         if lineIndex == lineLength then
             return
@@ -152,6 +162,9 @@ function coordInBox( x, y )
     y < MAIN_BOX[3] + MAIN_BOX[5] then
         selection = math.floor(x / 8)
         selectionLineIndex = selection + 1
+    end
+    if selectionLineIndex < 2 then
+        selectionLineIndex = 2
     end
 end
 
