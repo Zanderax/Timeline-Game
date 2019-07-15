@@ -9,12 +9,14 @@ changeFactor = 8
 bias = 0
 maxTimelineVariation = 150
 lose = false
+score = 0
 
 selectionLineIndex = 20
 
 UI_COLOR = {1, 1, 1}
 LINE_COLOR = {0.55, 0.1, 0.94}
 SELECTION_LINE_COLOR = { 0.4, 0.56, 0.14 }
+PREDICTION_COLOR= { 0.1, 0.58, 0.67 }
 
 -- UI
 -- mode, x, y, width, height
@@ -57,7 +59,7 @@ function love.draw()
     love.graphics.setColor(UI_COLOR)
 
     if lose then
-        love.graphics.print("The timeline is too unstable. You lose!")
+        love.graphics.print("The timeline is too unstable. You lose!", 75, 0)
     end
 
     drawLineSelection()
@@ -105,6 +107,33 @@ function love.draw()
             love.graphics.line( i*8, lineYCoord - line[i], (i+1)*8, lineYCoord - line[i+1] )
         end
     end
+
+    love.graphics.print("Score: " .. tostring(score) )
+
+    drawTimelinePrediction()
+end
+
+function drawTimelinePrediction()
+    local x, y = love.mouse.getPosition()
+    local hoverSlot = coordInSlot( x, y )
+    if hoverSlot == -1 then
+        return
+    end
+
+    love.graphics.push()
+    love.graphics.setColor(PREDICTION_COLOR)
+    for i = 1, math.min( slotLength - 1, lineLength - selectionLineIndex ) do
+        print( slot[hoverSlot][i])
+        x1Prediction = (selectionLineIndex + i - 1) * 8
+        x2Prediction = (selectionLineIndex + i) * 8
+        y1Prediction = lineYCoord - line[selectionLineIndex + i - 1] - slot[hoverSlot][i]
+        y2Prediction = lineYCoord - line[selectionLineIndex + i] - slot[hoverSlot][i+1]
+        love.graphics.circle( "fill", x1Prediction, y1Prediction, 2)
+        if i < lineLength and i ~= slotLength - 1 then
+            love.graphics.line( x1Prediction, y1Prediction, x2Prediction, y2Prediction )
+        end
+    end
+    love.graphics.pop()
 end
 
 function drawLineSelection( )
@@ -175,6 +204,9 @@ function love.mousepressed( x, y, button )
             addSlotToLine(slotClicked, 1)
             refreshSlot(slotClicked)
             checkLose()
+            if not lose then
+                score = score + 1
+            end
         end
         coordInBox( x, y )
     end
