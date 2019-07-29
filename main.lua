@@ -5,7 +5,7 @@ slots = 5
 slotLength = 15
 slotOffset = 25
 slotWidth = 150
-changeFactor = 8
+changeFactor = 5
 bias = 0
 maxTimelineVariation = 150
 lose = false
@@ -36,22 +36,57 @@ for i = 0, 4 do
     SLOT_BOXES[i+1][2] = { "line", i*150 + 38, 550, 100,  25 }
 end
 
+-- function AdvanceLine( linexcurrent, lineprev, )
+-- end
 line = {}
+slot = {}
 line[1] = 0
-for i=2, lineLength do
-    change = love.math.random( -changeFactor, changeFactor )
-    line[i] = line[i-1] + change + bias
-    bias = change
+change = 0
+
+function ResetMainLine()
+    line = {}
+    line[1] = 0
+    bias = 0
+    change = 0
+    for i=2, lineLength do
+        change = change + love.math.random( -changeFactor, changeFactor ) + bias
+        line[i] = line[i-1] + change
+        if change < 0 then
+            bias = bias + 1
+        end
+        if change > 0 then
+            bias = bias - 1
+        end
+        if bias > 5 then
+            bias = 5
+        end
+    end
 end
 
-slot = {}
-for s=1, slots do
-    slot[s] = {}
+function RefreshSlot( slotIndex )
     -- Timeline starts as stable
-    slot[s][1] = 0
+    bias = 0
+    change = 0
+    slot[slotIndex] = {}
+    slot[slotIndex][1] = 0
     for i=2, slotLength, 1 do
-        change = love.math.random( -changeFactor, changeFactor )
-        slot[s][i] = slot[s][i-1] + change
+        change = change + love.math.random( -changeFactor, changeFactor ) + bias
+        slot[slotIndex][i] = slot[slotIndex][i-1] + change
+        if change < 0 then
+            bias = bias + 2
+        end
+        if change > 0 then
+            bias = bias - 2
+        end
+        if bias > 5 then
+            bias = 5
+        end
+    end
+end
+
+function RefreshSlots()
+    for s=1, slots do
+        RefreshSlot(s)
     end
 end
 
@@ -59,8 +94,11 @@ function love.draw()
     love.graphics.setColor(UI_COLOR)
 
     if lose then
-        love.graphics.print("The timeline is too unstable. You lose!", 75, 0)
+        love.graphics.print("The timeline is too unstable. Save it! Or hit n to refresh if it is too far gone.", 75, 0)
+    else
+        love.graphics.print("This timeline is fine now! Don't you break it!", 75, 0)
     end
+
 
     drawLineSelection()
 
@@ -146,19 +184,17 @@ function drawLineSelection( )
     love.graphics.pop()
 end
 
-function checkLose()
+function CheckAndUpdateLose( shouldScore )
+    shouldScore = shouldScore or false
     for i = 1, lineLength do
         if line[i] > 150 or line[i] < -150 then
             lose = true
+            return
         end
     end
-end
-
-function refreshSlot( slotIndex )
-    slot[slotIndex][1] = 0
-    for i=2, slotLength do
-        change = love.math.random( -changeFactor, changeFactor )
-        slot[slotIndex][i] = slot[slotIndex][i-1] + change
+    lose = false
+    if shouldScore then
+        score = score + 50
     end
 end
 
@@ -202,8 +238,8 @@ function love.mousepressed( x, y, button )
         slotClicked = coordInSlot( x, y )
         if slotClicked ~= -1 then
             addSlotToLine(slotClicked, 1)
-            refreshSlot(slotClicked)
-            checkLose()
+            RefreshSlot(slotClicked)
+            CheckAndUpdateLose( true )
             if not lose then
                 score = score + 1
             end
@@ -212,7 +248,38 @@ function love.mousepressed( x, y, button )
     end
 end
 
+function HandleNumberKey( key )
+    score = score - 1
+    RefreshSlot( key )
+end
+
+function love.keypressed( key, scancode, isrepeat )
+    if key == "n" then
+        lose = false
+        ResetMainLine()
+        CheckAndUpdateLose()
+    end
+    if key == "1" then
+        HandleNumberKey(1)
+    end
+    if key == "2" then
+        HandleNumberKey(2)
+    end
+    if key == "3" then
+        HandleNumberKey(3)
+    end
+    if key == "4" then
+        HandleNumberKey(4)
+    end
+    if key == "5" then
+        HandleNumberKey(5)
+    end
+end
+
 
 function love.load()
+    RefreshSlots()
+    ResetMainLine()
+    CheckAndUpdateLose()
     love.window.setMode( 800, 600, {} )
 end
